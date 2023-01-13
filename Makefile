@@ -44,7 +44,7 @@ lint:  ##@Code Check code with mypy
 	poetry run python3 -m mypy --ignore-missing-imports app tests
 
 test: ##@Code Test code
-	make up
+	make up-dev
 	poetry run python3 -m pytest --verbosity=2 --showlocals -log-level=DEBUG --cov=app --cov-report term  --cov-fail-under=70
 
 format:  ##@Code Reformat code with black
