@@ -1,5 +1,5 @@
 import sqlalchemy
-from fastapi import APIRouter, Body, Depends, HTTPException
+from fastapi import APIRouter, Body, Depends, HTTPException, status
 
 from app import dto
 from app.deps import *
@@ -22,7 +22,7 @@ async def create_user(
         user = use_case.user.create(obj_in=payload)
     except sqlalchemy.exc.IntegrityError:
         raise HTTPException(
-            status_code=400,
+            status_code=status.HTTP_400_BAD_REQUEST,
             detail="The user with this username already exists in the system.",
         )
     return user
@@ -35,7 +35,10 @@ async def get_token(
 ):
     user = use_case.user.authenticate(dto.user.LoginUserScheme.from_orm(payload))
     if not user:
-        raise HTTPException(status_code=400, detail="Incorrect email or password")
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Incorrect email or password",
+        )
     return {
         "access_token": use_case.token.create(user.id),
         "token_type": "bearer",
