@@ -51,7 +51,7 @@ format:  ##@Code Reformat code with black
 	poetry run python3 -m black app tests
 
 migrate:  ##@Database Do all migrations in database
-	alembic -c app/db/alembic.ini upgrade $(args)
+	poetry run alembic -c app/db/alembic.ini upgrade $(args)
 
 run:  ##@Application Run application server
 	poetry run uvicorn app.__main__:app --host localhost --port 80 --reload --reload-dir app --reload-dir tests
@@ -59,7 +59,7 @@ open_db:  ##@Database Open database inside docker-image
 	docker exec -it postgres-container psql -d $(POSTGRES_DB) -U $(POSTGRES_USER)
 
 revision:  ##@Database Create new revision file automatically with prefix (ex. 2022_01_01_14cs34f_message.py)
-	alembic -c app/db/alembic.ini revision --autogenerate
+	poetry run alembic -c app/db/alembic.ini revision --autogenerate
 
 %::
 	echo $(MESSAGE)
