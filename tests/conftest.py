@@ -1,6 +1,7 @@
 import pytest
 from tests.database import *
 from fastapi.testclient import TestClient
+from fastapi import status
 
 from app.dto.user import CreateUserSchema
 from tests.overrides import app
@@ -31,5 +32,5 @@ def auth_headers(test_user, client: TestClient):
             "password": test_user["password"],
         },
     )
-    assert res.status_code == 200
+    assert res.status_code == status.HTTP_200_OK
     return {"Authorization": f"Bearer {res.json()['access_token']}"}

@@ -1,4 +1,4 @@
-from fastapi import Body, Depends, HTTPException, Path
+from fastapi import Body, Depends, HTTPException, Path, status
 from httpx import AsyncClient
 
 from app.config import settings
@@ -14,10 +14,12 @@ def get_current_user(
     try:
         user = use_case.user.authorize(token)
     except InvalidCredentials as e:
-        raise HTTPException(status_code=403, detail=e.detail)
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail=e.detail)
 
     if not user:
-        raise HTTPException(status_code=404, detail="User not found")
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail="User not found"
+        )
     return user
 
 
@@ -27,7 +29,9 @@ def get_current_post(
 ):
     post = use_case.post.get(id=post_id)
     if not post:
-        raise HTTPException(status_code=404, detail="Post not found")
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail="Post not found"
+        )
     return post
 
 
@@ -53,7 +57,7 @@ async def validate_email(payload: CreateUserSchema = Body()):
                 "api_key": settings.emailhunter_api_key,
             },
         )
-        if 200 == resp.status_code and resp.json()["data"]["status"] in (
+        if status.HTTP_200_OK == resp.status_code and resp.json()["data"]["status"] in (
             "valid",
             "accept_all",
             "webmail",
@@ -61,6 +65,6 @@ async def validate_email(payload: CreateUserSchema = Body()):
             return
 
     raise HTTPException(
-        status_code=400,
+        status_code=status.HTTP_400_BAD_REQUEST,
         detail="Bad email address or email validation server is dead :(",
     )

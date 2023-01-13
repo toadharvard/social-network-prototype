@@ -1,7 +1,7 @@
 import pytest
 from fastapi.testclient import TestClient
 from sqlalchemy.orm import Session
-
+from fastapi import status
 from app.db.postgres import models
 from app.dto.user import *
 from tests.database import created_rows_count
@@ -22,7 +22,7 @@ class TestAuthRouter:
     ):
         with created_rows_count(session, models.User, 1):
             resp = client.post(self.default_api_url + "/register", json=payload.dict())
-        assert resp.status_code == 200
+        assert resp.status_code == status.HTTP_200_OK
 
     @pytest.mark.parametrize("payload", factory(CreateUserSchema).batch(3))
     def test_register_already_exist(
@@ -32,10 +32,10 @@ class TestAuthRouter:
         session: Session,
     ):
         resp = client.post(self.default_api_url + "/register", json=payload.dict())
-        assert resp.status_code == 200
+        assert resp.status_code == status.HTTP_200_OK
         with created_rows_count(session, models.User, 0):
             resp = client.post(self.default_api_url + "/register", json=payload.dict())
-        assert resp.status_code == 400
+        assert resp.status_code == status.HTTP_400_BAD_REQUEST
 
     @pytest.mark.parametrize("_", range(3))
     def test_delete_user(
@@ -49,7 +49,7 @@ class TestAuthRouter:
             resp = client.delete(
                 self.default_api_url + "/takeout", headers=auth_headers
             )
-        assert resp.status_code == 200
+        assert resp.status_code == status.HTTP_200_OK
 
     def test_login_existing_user(self, test_user: dict, client: TestClient):
         resp = client.post(
@@ -59,7 +59,7 @@ class TestAuthRouter:
                 "password": test_user["password"],
             },
         )
-        assert resp.status_code == 200
+        assert resp.status_code == status.HTTP_200_OK
 
     def test_login_not_existing_user(self, client: TestClient):
         resp = client.post(
@@ -69,4 +69,4 @@ class TestAuthRouter:
                 "password": "fakepassword",
             },
         )
-        assert resp.status_code == 400
+        assert resp.status_code == status.HTTP_400_BAD_REQUEST
