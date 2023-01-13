@@ -1,0 +1,32 @@
+version: '3'
+
+services:
+  postgres:
+    container_name: 'postgres-container'
+    image: postgres:14
+    restart: always
+    env_file:
+      - .env
+    ports:
+      - '${POSTGRES_PORT}:${POSTGRES_PORT}'
+
+  redis:
+    container_name: 'redis-container'
+    image: redis:alpine
+    env_file:
+      - .env
+    restart: always
+    ports:
+      - '${REDIS_PORT}:${REDIS_PORT}'
+  app:
+    container_name: 'app-container'
+    build: .
+    ports:
+      - 80:8080
+    env_file:
+      - .env
+    environment:
+      - REDIS_HOST=redis
+    depends_on:
+      - redis
+      - postgres
